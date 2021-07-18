@@ -1,6 +1,8 @@
 # TonMOBIL-Box
 Meine angepasste Version des TonUINO von Thorsten Voß. https://www.voss.earth/tonuino/
 
+![TonUNIO-Box](Bilder/TonUINO.png)
+
 Die Zeiten von Kasseten und CD sind inzwischen vorbei. Heute sind MP3-Dateien das Medium der Wahl.
 Die TonMOBIL-Box basiert auf dem OpenSource Projekt TonUNIO. Es ermöglicht auch Kleinkindern selbstständig ihre Lieblings-MP3 abzuspielen. Sie verbinden eine Figur oder einen Button mit der Musik oder einem Hörspiel.
 
