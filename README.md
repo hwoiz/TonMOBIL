@@ -23,4 +23,4 @@ folgt in Kürze
 folgt in Kürze
 ## Handbücher
 - [Benutzerhandbuch (PDF)](Dokumente/Benutzerhandbuch.pdf)
-- [Technische Dokumentation (PDF)](Dokumente/Technische Dokumentation.pdf)
+- [Technische Dokumentation (PDF)](Dokumente/TechnischeDokumentation.pdf)
