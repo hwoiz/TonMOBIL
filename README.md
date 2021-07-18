@@ -1,7 +1,9 @@
 # TonMOBIL-Box
-Meine angepasste Version des TonUINO von Thorsten Voß. [https://www.voss.earth/tonuino](https://www.voss.earth/tonuino)
 ## Meine Box
 ![TonMOBIL-Box](Bilder/TonMOBIL-Box.png)
+## Danksagung
+Als Vorlage für mein Projekt diente das Projekt TonUINO von Thorsten Voß.
+[https://www.voss.earth/tonuino](https://www.voss.earth/tonuino)
 ## Einleitung
 Die Zeiten von Kasseten und CD sind inzwischen vorbei. Heute sind MP3-Dateien das Medium der Wahl.
 Die TonMOBIL-Box basiert auf dem OpenSource Projekt TonUNIO. Es ermöglicht auch Kleinkindern selbstständig ihre Lieblings-MP3 abzuspielen. Sie verbinden eine Figur oder einen Button mit der Musik oder einem Hörspiel.
@@ -15,5 +17,10 @@ Durch aufsetzen einer Figur / Button auf die Oberseite der Box können nun auch 
 Um die Wiedergabe zu beenden, muss die mittlere Taste einmal kurz gedrückt werden, die Wiedergabe pausiert nun. Nach 5 Minuten ohne Wiedergabe schaltet die Box automatisch ab.
 
 Auf der Vorderseite befindet sich ein Anschluss für einen 3,5 mm Kopfhörer. Wird dieser gesteckt, werden die Lautsprecher abgeschaltet.
-
+## 3D-Druck
+folgt in Kürze
+## Hardware
+folgt in Kürze
+## Software
+folgt in Kürze
 
