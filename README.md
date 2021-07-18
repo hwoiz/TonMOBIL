@@ -7,16 +7,14 @@ Als Vorlage für mein Projekt diente das Projekt TonUINO von Thorsten Voß.
 ## Einleitung
 Die Zeiten von Kasseten und CD sind inzwischen vorbei. Heute sind MP3-Dateien das Medium der Wahl.
 Die TonMOBIL-Box basiert auf dem OpenSource Projekt TonUNIO. Es ermöglicht auch Kleinkindern selbstständig ihre Lieblings-MP3 abzuspielen. Sie verbinden eine Figur oder einen Button mit der Musik oder einem Hörspiel.
-
-Die Eltern füllen hierzu die SD-Karte der Box mit der Lieblingsmusik, oder den Lieblingshörspielen und ordnen die Titel einem NFC-Tags zu. Diese Tags sind in der Fußplatte der Figuren oder den Button eingebaut.
-
-Zur Nutzung der Box muss das Kind die mittlere Tastenur nur kurz drücken, nach wenigen Sekunden beginnt die Box eine zufällige MP3-Datei aus dem Album Nummer 1 abzuspielen.
-
-Durch aufsetzen einer Figur / Button auf die Oberseite der Box können nun auch andere Alben ausgewählt werden. Die Box unterbricht nach Abnehmen der Figur / Button die Wiedergabe nicht. 
-
-Um die Wiedergabe zu beenden, muss die mittlere Taste einmal kurz gedrückt werden, die Wiedergabe pausiert nun. Nach 5 Minuten ohne Wiedergabe schaltet die Box automatisch ab.
-
-Auf der Vorderseite befindet sich ein Anschluss für einen 3,5 mm Kopfhörer. Wird dieser gesteckt, werden die Lautsprecher abgeschaltet.
+## Eigenschaften
+- Die Eltern füllen die SD-Karte der Box mit der Lieblingsmusik, oder den Lieblingshörspielen und ordnen diese einem NFC-Tags zu. Diese Tags können in der Fußplatte von Figuren, Motivkarten oder Buttons eingebaut sein.
+- Zur Nutzung der Box muss das Kind nur die mittlere Taste einmal kurz drücken, nach wenigen Sekunden beginnt die Box eine MP3-Datei aus dem Album Nummer 1 abzuspielen.
+- Durch aufsetzen einer Figur, Karte oder Button auf die Oberseite der Box können nun auch andere Alben ausgewählt werden. Die Box unterbricht nach Abnehmen der Figur / Button die Wiedergabe nicht. Ein widerholtes Aufsetzen spielt das nächste Lied / Hörspiel. 
+- Die Wiedergabe kann durch kurzen Druck pausiert werden. Ein erneuter Kurzer Druck setzt die Wiedergabe fort. Verbleibt die Box 5 Minuten im Pausenmodus, wird die Box ausgeschaltet.
+- Im Pausenmodus können durch langen Druck (>2 Sek.) vordefinierte Alben abgespielt werden.
+- Im Playmodus knn über die beiden äuseren Tasten mit kurzen Tastendruck die Lautstärke verändert werden. Mit einem langen Tastendruck (>2 Sek.) Kann durch die Titel des aktuellen Albums geblättert werden.
+- Wird wird auf der Vorderseite ein Kopfhörer angeschlossen, werden die Lautsprecher abgeschaltet.
 ## 3D-Druck
 folgt in Kürze
 ## Hardware
