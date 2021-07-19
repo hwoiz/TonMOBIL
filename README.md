@@ -19,7 +19,10 @@ Die TonMOBIL-Box basiert auf dem OpenSource Projekt TonUNIO. Es ermöglicht auch
 Das Gehäuse wurde komplett mit einem 3D-Drucker erstellt. Die STL-Dateien sind im Verzeichnis [STL-Dateien](STL-Dateien) verfügbar. Die STL-Dateien wurden mit Fusion360 erstellt. Eine Exportdatei vom Fusion-Projekt liegt im Verzeichnis [Fusion360](Fusion360).
 ## Hardware
 Für die Box wurde eine eigene Platine mit KICAD entwicket. Die für die Fertigung erforderliche Gerber-Datei ist im Ordner [KICAD](KICAD) verfügbar.
-Soweit es möglich war, wurden fertige Module benutzt. Dies vereinfacht den Aufbau der Schaltung. Einzelheiten der technischen Realisierung können dem Handbuch [Technische Dokumentation (PDF)](Dokumente/TechnischeDokumentation.pdf) entnommen werden.
+
+Soweit es möglich war, wurden fertige Module benutzt. Dies vereinfacht den Aufbau der Schaltung. 
+
+Einzelheiten der technischen Realisierung können dem Handbuch [Technische Dokumentation (PDF)](Dokumente/TechnischeDokumentation.pdf) entnommen werden.
 ## Software
 folgt in Kürze
 ## Handbücher
