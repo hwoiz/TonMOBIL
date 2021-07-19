@@ -27,9 +27,7 @@ Der Schaltplan und die Verkabelung der Module können dem Handbuch [Technische D
 Die angepasste Firmware für den Arduino basiert auf der Lösung von Thorten Voß. [github.com/xfjx/TonUINO](https://github.com/xfjx/TonUINO)
 Sie wurde um folgende Eigenschaften ergänzt:
 - Einschalten über die Play/Pause-Taste.
-- Statusanzeige in Form einer LED-Lichtleiste nach dem Vorschlag aus folgendem Forumsbeitrag. [https://discourse.voss.earth/t/integration-led-strip-und-ring-
-mit-neopixel/2760/8](https://discourse.voss.earth/t/integration-led-strip-und-ring-
-mit-neopixel/2760/8)
+- Statusanzeige in Form einer LED-Lichtleiste nach dem Vorschlag aus folgendem Forumsbeitrag. [https://discourse.voss.earth/t/integration-led-strip-und-ring-mit-neopixel/2760/8](https://discourse.voss.earth/t/integration-led-strip-und-ring-mit-neopixel/2760/8)
 ## Handbücher
 Eine vollständige Beschreibung aller Funktionen findet sich im [Benutzerhandbuch (PDF)](Dokumente/Benutzerhandbuch.pdf).
 
