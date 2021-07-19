@@ -29,8 +29,9 @@ Soweit es möglich war, wurden fertige Module benutzt. Dies vereinfacht den Aufb
 Die Schaltung des TonUINO wurde um folgende Elemente ergänzt:
 - Kopfhörerbuchse mit Abschaltung der Lautsprecher.
 - Einschalten der Box über die Ply/Pause-Taste mit einem Pololu-Switch.
+- Stromversorgung aus Akku, Lade-/Entladeschaltung und StepUp-Regler.
 - Statusanzeige der Betriebszustände mit einem RGB LED-Streifen WS2812B mit 15 LED.
-- Einen mit einer aufgebogenen Büroklammer nutzbaren Reset-Taster.
+- Einen mit einer aufgebogenen Büroklammer nutzbaren Reset-Taster. (Er trennt den Akku von der Schaltung)
 
 Für die Schaltung wurde eine Platine mit KICAD entwicket. Die für die Fertigung erforderliche Gerber-Datei ist im Ordner [KICAD](KICAD) verfügbar.
 
