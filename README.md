@@ -26,8 +26,8 @@ Der Schaltplan und die Verkabelung der Module können dem Handbuch [Technische D
 ## Software
 Die angepasste Firmware für den Arduino basiert auf der Lösung von Thorten Voß. [github.com/xfjx/TonUINO](https://github.com/xfjx/TonUINO)
 Sie wurde um folgende Eigenschaften ergänzt:
-- Einschalten über die Play/Pause-Taste.
-- Statusanzeige in Form einer LED-Lichtleiste nach dem Vorschlag aus folgendem Forumsbeitrag. [https://discourse.voss.earth/t/integration-led-strip-und-ring-mit-neopixel/2760/8](https://discourse.voss.earth/t/integration-led-strip-und-ring-mit-neopixel/2760/8)
+- Um das im Forumsbeitrag [mp3.getFolderTrackCount liefert falschen Wert](https://discourse.voss.earth/t/mp3-getfoldertrackcount-liefert-falschen-wert/3406) besprochene Fehlverhalten einiger MP3-Module zu umgehen, wurde in jeden Ordner eine Datei 000_Album-Nummer-xx.mp3 eingefügt. Sie enthält der Text Album Nummer ## und wird vor dem Aufruf von mp3.getFolderTrackCount abgespielt. Damit wird der Fehler in der Firmware von einigen MP3-Modulen umgangen.
+- Statusanzeige in Form einer LED-Lichtleiste nach dem Vorschlag aus folgendem Forumsbeitrag: [https://discourse.voss.earth/t/integration-led-strip-und-ring-mit-neopixel/2760/8](https://discourse.voss.earth/t/integration-led-strip-und-ring-mit-neopixel/2760/8)
 ## Handbücher
 Eine vollständige Beschreibung aller Funktionen findet sich im [Benutzerhandbuch (PDF)](Dokumente/Benutzerhandbuch.pdf).
 
