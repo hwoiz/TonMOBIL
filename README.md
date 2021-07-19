@@ -20,11 +20,17 @@ Das Gehäuse wurde komplett mit einem 3D-Drucker erstellt. Die STL-Dateien sind 
 ## Hardware
 Soweit es möglich war, wurden fertige Module benutzt. Dies vereinfacht den Aufbau der Schaltung. 
 
-Für die Box wurde eine eigene Platine mit KICAD entwicket. Die für die Fertigung erforderliche Gerber-Datei ist im Ordner [KICAD](KICAD) verfügbar.
+Die Schaltung des TonUINO wurde um folgende Elemente ergänzt:
+- Kopfhörerbuchse mit Abschaltung der Lautsprecher.
+- Einschalten der Box über die Ply/Pause-Taste mit einem Pololu-Switch.
+- Statusanzeige der Betriebszustände mit einem RGB LED-Streifen WS2812B mit 15 LED.
+- Einen mit einer aufgebogenen Büroklammer nutzbaren Reset-Taster.
+
+Für die Schaltung wurde eine Platine mit KICAD entwicket. Die für die Fertigung erforderliche Gerber-Datei ist im Ordner [KICAD](KICAD) verfügbar.
 
 Der Schaltplan und die Verkabelung der Module können dem Handbuch [Technische Dokumentation (PDF)](Dokumente/TechnischeDokumentation.pdf) entnommen werden.
 ## Software
-Die angepasste Firmware für den Arduino basiert auf der Lösung von Thorten Voß. [github.com/xfjx/TonUINO](https://github.com/xfjx/TonUINO)
+Die angepasste [Firmware](Firmware/TonMOBIL) für den Arduino basiert auf der Lösung von Thorten Voß. [github.com/xfjx/TonUINO](https://github.com/xfjx/TonUINO)
 Sie wurde um folgende Eigenschaften ergänzt:
 - Um das im Forumsbeitrag [mp3.getFolderTrackCount liefert falschen Wert](https://discourse.voss.earth/t/mp3-getfoldertrackcount-liefert-falschen-wert/3406) besprochene Fehlverhalten einiger MP3-Module zu umgehen, wurde in jeden Ordner eine Datei 000_Album-Nummer-xx.mp3 eingefügt. Sie enthält der Text Album Nummer ## und wird vor dem Aufruf von mp3.getFolderTrackCount abgespielt. Damit wird der Fehler in der Firmware von einigen MP3-Modulen umgangen.
 - Statusanzeige in Form einer LED-Lichtleiste nach dem Vorschlag aus folgendem Forumsbeitrag: [https://discourse.voss.earth/t/integration-led-strip-und-ring-mit-neopixel/2760/8](https://discourse.voss.earth/t/integration-led-strip-und-ring-mit-neopixel/2760/8)
