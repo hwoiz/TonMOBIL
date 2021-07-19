@@ -16,7 +16,13 @@ Die TonMOBIL-Box basiert auf dem OpenSource Projekt TonUNIO. Es ermöglicht auch
 - Im Playmodus knn über die beiden äuseren Tasten mit kurzen Tastendruck die Lautstärke verändert werden. Mit einem langen Tastendruck (>2 Sek.) Kann durch die Titel des aktuellen Albums geblättert werden.
 - Wird wird auf der Vorderseite ein Kopfhörer angeschlossen, werden die Lautsprecher abgeschaltet.
 ## 3D-Druck
-Das Gehäuse wurde komplett mit einem 3D-Drucker erstellt. Die STL-Dateien sind im Verzeichnis [STL-Dateien](STL-Dateien) verfügbar. Die STL-Dateien wurden mit Fusion360 erstellt. Eine Exportdatei vom Fusion-Projekt liegt im Verzeichnis [Fusion360](Fusion360).
+Das Gehäuse wurde komplett mit einem 3D-Drucker erstellt. Das Gehäuse besteht aus den Elementen Vorderteil, Rückseite, Hülle, Bügel und einige Zusatzteile. Die beiden Schrauben am Bügel halten die Box kindersicher zusammen.
+
+Für die 3mm-Schrauben wurden 3mm Messing-Einpress-Muttern in die gedruckten Teile eingeschmolzen.
+
+Die für den Druck der Einzelteile sind die STL-Dateien im Verzeichnis [STL-Dateien](STL-Dateien) verfügbar. 
+
+Die STL-Dateien wurden mit Fusion360 erstellt. Zur Modifikation der STL-Daten steht eine Exportdatei vom Fusion360-Projekt im Verzeichnis [Fusion360](Fusion360) zu Verfügung. Sie enthält neben den Gehäuseteilen auch alle Elektronikkomponemten als Modell.
 ## Hardware
 Soweit es möglich war, wurden fertige Module benutzt. Dies vereinfacht den Aufbau der Schaltung. 
 
