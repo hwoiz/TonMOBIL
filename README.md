@@ -22,5 +22,6 @@ folgt in Kürze
 ## Software
 folgt in Kürze
 ## Handbücher
-- [Benutzerhandbuch (PDF)](Dokumente/Benutzerhandbuch.pdf)
-- [Technische Dokumentation (PDF)](Dokumente/TechnischeDokumentation.pdf)
+Eine vollständige Beschreibung aller Funktionen findet sich im [Benutzerhandbuch (PDF)](Dokumente/Benutzerhandbuch.pdf).
+
+Die technischen Details und die benötigten Bauteile können dem Handbuch [Technische Dokumentation (PDF)](Dokumente/TechnischeDokumentation.pdf) entnommen werden.
