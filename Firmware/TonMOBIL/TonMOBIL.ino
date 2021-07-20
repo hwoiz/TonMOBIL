@@ -3,12 +3,12 @@
   |_   _|___ ___|  |  |     |   | |     |
     | | | . |   |  |  |-   -| | | |  |  |
     |_| |___|_|_|_____|_____|_|___|_____|
-    TonUINO Version 2.1 - TonUINO_Lotti_V2-Pololu
+    TonUINO Version 2.1 
 
     created by Thorsten Voß and licensed under GNU/GPL.
-    Information and contribution at https://tonuino.de.
+    Information and contribution at https://tonuino.de. 
     
-    Advance by Harald Woizischke
+    Erweiterungen von Harald Woizischke für TonMOBIL https://github.com/hwoiz/TonMOBIL
 */
 
 #include <DFMiniMp3.h>
