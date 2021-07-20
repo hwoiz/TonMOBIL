@@ -920,10 +920,9 @@ void setup() {
   }
 
 // welcome sound
-  mp3.playMp3FolderTrack(801);
+//  mp3.playMp3FolderTrack(801);
 
-  // Verzögerter Start "Shortcut at Startup" 
-  delay(2000);  
+  //Start "Shortcut at Startup"  
   playShortCut(3);
 
   Serial.println(F("TonUINO ready"));
@@ -990,7 +989,7 @@ void playFolder() {
     knownCard = true;
     _lastTrackFinished = 9999; // Verhindert nextTrack()
     mp3.playFolderTrack(myFolder->folder, 0);
-    delay(3000);  //Pause zur Ansage der Ordnernummer
+    waitForTrackToFinish();  //Warten bis Ansage der Ordnernummer beendet
     numTracksInFolder = mp3.getFolderTrackCount(myFolder->folder) - 1;
     _lastTrackFinished = 0;
     firstTrack = 1;
