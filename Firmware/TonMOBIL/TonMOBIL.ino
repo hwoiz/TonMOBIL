@@ -1,14 +1,19 @@
 /*
-   _____         _____ _____ _____ _____
-  |_   _|___ ___|  |  |     |   | |     |
-    | | | . |   |  |  |-   -| | | |  |  |
-    |_| |___|_|_|_____|_____|_|___|_____|
-    TonUINO Version 2.1 
+    _______          __  __  ____  ____ _____ _      
+   |__   __|        |  \/  |/ __ \|  _ \_   _| |     
+      | | ___  _ __ | \  / | |  | | |_) || | | |     
+      | |/ _ \| '_ \| |\/| | |  | |  _ < | | | |     
+      | | (_) | | | | |  | | |__| | |_) || |_| |____ 
+      |_|\___/|_| |_|_|  |_|\____/|____/_____|______|
 
-    created by Thorsten Voß and licensed under GNU/GPL.
-    Information and contribution at https://tonuino.de. 
-    
-    Erweiterungen von Harald Woizischke für TonMOBIL https://github.com/hwoiz/TonMOBIL
+  TonMOBIL Version 1.1
+  Harald Woizischke 
+  llizensiert unter GNU/GPL
+  https://github.com/hwoiz/TonMOBIL
+   
+  Basiert auf der Idee von TonUINO Version 2.1 
+  created by Thorsten Voß and licensed under GNU/GPL.
+  Information and contribution at https://tonuino.de. 
 */
 
 #include <DFMiniMp3.h>
@@ -27,7 +32,6 @@
 #define POLOLUSWITCH
 
 static const uint32_t cardCookie = 322417479;
-
 
 // DFPlayer Mini
 SoftwareSerial mySoftwareSerial(3, 2); // RX, TX
@@ -86,6 +90,7 @@ void writeCard(nfcTagObject nfcTag);
 void dump_byte_array(byte * buffer, byte bufferSize);
 void adminMenu(bool fromCard = false);
 bool knownCard = false;
+bool ansage = false;
 
 // implement a notification class,
 // its member methods will get called
@@ -157,10 +162,9 @@ class Mp3Notify {
       Serial.println(action);
     }
     static void OnPlayFinished(DfMp3_PlaySources source, uint16_t track) {
-      Serial.print("Track beendet: ");
-      Serial.println(track);
+      Serial.println("Track beendet");
       delay(500);
-	    nextTrack(track);
+      if (!ansage) nextTrack(track);
     }
     static void OnPlaySourceOnline(DfMp3_PlaySources source) {
       PrintlnSourceAction(source, "online");
@@ -840,18 +844,20 @@ void setup() {
   randomSeed(ADCSeed); // Zufallsgenerator initialisieren
 
   // Dieser Hinweis darf nicht entfernt werden
-  Serial.println(F("\n _____         _____ _____ _____ _____"));
-  Serial.println(F("|_   _|___ ___|  |  |     |   | |     |"));
-  Serial.println(F("  | | | . |   |  |  |-   -| | | |  |  |"));
-  Serial.println(F("  |_| |___|_|_|_____|_____|_|___|_____|\n"));
-  Serial.println(F("TonUINO Version 2.1 - TonUINO_Lotti_V2-Pololu"));
-  Serial.println(F("created by Thorsten Voß and licensed under GNU/GPL."));
-  Serial.println(F("Information and contribution at https://tonuino.de.\n"));
-  Serial.println(F("Advance by Harald Woizischke\n"));
-  Serial.print(F("flashed on "));
-  Serial.print(__DATE__);
-  Serial.print(F("  "));
-  Serial.println(__TIME__);
+  Serial.println(F("  _______          __  __  ____  ____ _____ _      "));
+  Serial.println(F(" |__   __|        |  \/  |/ __ \|  _ \_   _| |     "));
+  Serial.println(F("    | | ___  _ __ | \  / | |  | | |_) || | | |     "));
+  Serial.println(F("    | |/ _ \| '_ \| |\/| | |  | |  _ < | | | |     "));
+  Serial.println(F("    | | (_) | | | | |  | | |__| | |_) || |_| |____ "));
+  Serial.println(F("    |_|\___/|_| |_|_|  |_|\____/|____/_____|______|"));
+  Serial.println(F("TonMOBIL Version 1.1"));
+  Serial.println(F("Weiterentwicklung Harald Woizischke"));
+  Serial.println(F("basiert auf TonUINO Version 2.1 von Torsten Voss https://tonuino.de"));
+  Serial.println(F("Lizenziert unter GNU/GPL"));
+  Serial.println(F("Projektrepository https://github.com/hwoiz/TonMOBIL"));
+  Serial.print(F("Flashversion "));Serial.print(__DATE__);Serial.print(F("  "));Serial.println(__TIME__);
+
+
 
 
   // Busy Pin
@@ -983,17 +989,21 @@ void previousButton() {
 }
 
 void playFolder() {
-    Serial.print(F("== playFolder()")); 
-    Serial.print("Ordner ");Serial.print(myFolder->folder);Serial.println(" wird abgespielt");
     disablestandbyTimer();
     knownCard = true;
-    _lastTrackFinished = 9999; // Verhindert nextTrack()
-    mp3.playFolderTrack(myFolder->folder, 0);
+    ansage = true; // Verhindert nextTrack()
+    Serial.print(F("== playFolder(")); 
+    Serial.print("Album ");Serial.print(myFolder->folder);Serial.println(")");
+    Serial.print("== Album-Ansage 000 spielen in Ordner ");Serial.println(myFolder->folder);
+    mp3.playFolderTrack(myFolder->folder,0);
+    delay(3000); // Warten - Der Track 000 muss innerhalb dieser Zeit starten
     waitForTrackToFinish();  //Warten bis Ansage der Ordnernummer beendet
-    numTracksInFolder = mp3.getFolderTrackCount(myFolder->folder) - 1;
+    ansage = false; // Erlaubt nextTrack
+    Serial.println(F("== Anzahl der Dateien im Ordner werden ermitteln")); 
+    numTracksInFolder = mp3.getFolderTrackCount(myFolder->folder) - 1; // Die Ansage wird abgezogen
+    Serial.print(numTracksInFolder); Serial.print(F(" Dateien in Ordner ")); Serial.println(myFolder->folder);
     _lastTrackFinished = 0;
     firstTrack = 1;
-    Serial.print(numTracksInFolder); Serial.print(F(" Dateien in Ordner ")); Serial.println(myFolder->folder);
 
   // Hörspielmodus: eine zufällige Datei aus dem Ordner
   if (myFolder->mode == 1) {
