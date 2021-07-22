@@ -6,15 +6,17 @@
       | | (_) | | | | |  | | |__| | |_) || |_| |____ 
       |_|\___/|_| |_|_|  |_|\____/|____/_____|______|
 
-  TonMOBIL Version 1.1
+  
   Harald Woizischke 
-  llizensiert unter GNU/GPL
+  Lizensiert unter GNU/GPL
   https://github.com/hwoiz/TonMOBIL
    
-  Basiert auf der Idee von TonUINO Version 2.1 
+  Weiterentwicklung von TonUINO Version 2.1 
   created by Thorsten Voß and licensed under GNU/GPL.
   Information and contribution at https://tonuino.de. 
 */
+
+char version[] = "1.2";
 
 #include <DFMiniMp3.h>
 #include <EEPROM.h>
@@ -23,7 +25,46 @@
 #include <SPI.h>
 #include <SoftwareSerial.h>
 #include <avr/sleep.h>
+#include <Adafruit_NeoPixel.h>
 
+// LED Strip
+// uncomment the below line to enable LED Strip and Ring support
+#define LED_SR
+
+#ifdef LED_SR
+#define LED_PIN    6              // Der Pin am Arduino vom dem das Daten Signal rausgeht
+#define LED_COUNT 15              // Anzahl an LEDs im Ring oder Strip
+
+// Declare NeoPixel strip object:
+Adafruit_NeoPixel strip(LED_COUNT, LED_PIN, NEO_GRB + NEO_KHZ800);
+
+// Zählvarbiablen
+uint16_t loopCountdown;       // Runterzählen der Loops
+uint16_t lsrLoopCountWait;    // Definierte Anzahl wieviele Loops runtergezählt werden sollen, also wie lange gewartet wird
+uint8_t animationCountdown;   // Wie oft die einmalige Animation ausgeführt wird bevor es zurück in die Hauptschleife (Animationsmodus 0) geht
+uint8_t x;
+uint8_t y;
+uint8_t z;
+uint8_t i;
+
+// Datenvarbiablen
+uint32_t lsrColorUp = strip.Color(0, 255, 0);   // Farbe wird bei Animation nächstes Lied verwendet
+uint32_t lsrColorDown = strip.Color(0, 0, 255); // Farbe wird bei Animation Lied zurück verwendet
+uint8_t currentDetectedVolume;                  // Speichern der aktuellen Lautstärke für späteren Vergleich
+uint8_t lastDetectedVolume;                     // Speichern der Lautstärke um die Animation nur ein mal zu triggern
+uint8_t volumeScope;                            // Differenz der von euch eingestellten minimalen und maximalen Lautstärke
+uint8_t volumeScopeAmount;                      // Lautstärkenwert in deinem Scope
+uint8_t currentDetectedTrack;                   // Speichern des aktuellen Tracks für späteren Vergleich
+uint8_t lastDetectedTrack;                      // Speichern des Tracks um die Animation nur ein mal zu triggern
+uint8_t lsrAnimationMode;                       // Animationsmodus - 0: Daueranimation, 1-2 einmalige Animation (als Unterbrechung zu 0)
+uint8_t lsrAnimationTrackMode;                  // Bei Animationsmodus Liedwechsel bestimmung der Farbe und Richtung
+uint32_t lsrHueCalc;                            // Zwischenspeicher einer Farbe
+uint32_t lsrColors;                             // Zwischenspeicher einer Farbe
+uint8_t lsrColorR[LED_COUNT];                   // Zwischenspeicher des Rot-Wertes für alle LEDs
+uint8_t lsrColorG[LED_COUNT];                   // Zwischenspeicher des Grün-Wertes für alle LEDs
+uint8_t lsrColorB[LED_COUNT];                   // Zwischenspeicher des Blau-Wertes für alle LEDs
+
+#endif
 
 // uncomment the below line to enable five button support
 //#define FIVEBUTTONS
@@ -164,7 +205,7 @@ class Mp3Notify {
     static void OnPlayFinished(DfMp3_PlaySources source, uint16_t track) {
       Serial.println("Track beendet");
       delay(500);
-      if (!ansage) nextTrack(track);
+      if (!ansage) nextTrack(track); // Spielt den nächsten Track wenn der aktuelle Track kein 000_xxxx Ansagetrack war
     }
     static void OnPlaySourceOnline(DfMp3_PlaySources source) {
       PrintlnSourceAction(source, "online");
@@ -194,10 +235,6 @@ void shuffleQueue() {
     queue[i] = queue[j];
     queue[j] = t;
   }
-  /*  Serial.println(F("Queue :"));
-    for (uint8_t x = 0; x < numTracksInFolder - firstTrack + 1 ; x++)
-      Serial.println(queue[x]);
-  */
 }
 
 void writeSettingsToFlash() {
@@ -226,7 +263,6 @@ void resetSettings() {
   mySettings.adminMenuPin[1] = 1;
   mySettings.adminMenuPin[2] = 1;
   mySettings.adminMenuPin[3] = 1;
-
   writeSettingsToFlash();
 }
 
@@ -579,11 +615,6 @@ static void nextTrack(uint16_t track) {
     if (activeModifier->handleNext() == true)
       return;
 
-   if (_lastTrackFinished == 9999) {
-      // Wenn Albumnummer angesagt wird, kein nextTrack()
-      return;
-   }
-
   if (track == _lastTrackFinished) {
     return;
   }
@@ -790,46 +821,7 @@ void waitForTrackToFinish() {
 }
 
 
-// LED Strip
-// uncomment the below line to enable LED Strip and Ring support
-#define LED_SR
-
-#ifdef LED_SR
-#include <Adafruit_NeoPixel.h>
-#define LED_PIN    6              // Der Pin am Arduino vom dem das Daten Signal rausgeht
-#define LED_COUNT 15              // Anzahl an LEDs im Ring oder Strip
- 
-// Declare NeoPixel strip object:
-Adafruit_NeoPixel strip(LED_COUNT, LED_PIN, NEO_GRB + NEO_KHZ800);
-
-// Zählvarbiablen
-uint16_t loopCountdown;       // Runterzählen der Loops
-uint16_t lsrLoopCountWait;    // Definierte Anzahl wieviele Loops runtergezählt werden sollen, also wie lange gewartet wird
-uint8_t animationCountdown;   // Wie oft die einmalige Animation ausgeführt wird bevor es zurück in die Hauptschleife (Animationsmodus 0) geht
-uint8_t x;
-uint8_t y;
-uint8_t z;
-uint8_t i;
-
-// Datenvarbiablen
-uint32_t lsrColorUp = strip.Color(0, 255, 0);   // Farbe wird bei Animation nächstes Lied verwendet
-uint32_t lsrColorDown = strip.Color(0, 0, 255); // Farbe wird bei Animation Lied zurück verwendet
-uint8_t currentDetectedVolume;                  // Speichern der aktuellen Lautstärke für späteren Vergleich
-uint8_t lastDetectedVolume;                     // Speichern der Lautstärke um die Animation nur ein mal zu triggern
-uint8_t volumeScope;                            // Differenz der von euch eingestellten minimalen und maximalen Lautstärke
-uint8_t volumeScopeAmount;                      // Lautstärkenwert in deinem Scope
-uint8_t currentDetectedTrack;                   // Speichern des aktuellen Tracks für späteren Vergleich
-uint8_t lastDetectedTrack;                      // Speichern des Tracks um die Animation nur ein mal zu triggern
-uint8_t lsrAnimationMode;                       // Animationsmodus - 0: Daueranimation, 1-2 einmalige Animation (als Unterbrechung zu 0)
-uint8_t lsrAnimationTrackMode;                  // Bei Animationsmodus Liedwechsel bestimmung der Farbe und Richtung
-uint32_t lsrHueCalc;                            // Zwischenspeicher einer Farbe
-uint32_t lsrColors;                             // Zwischenspeicher einer Farbe
-uint8_t lsrColorR[LED_COUNT];                   // Zwischenspeicher des Rot-Wertes für alle LEDs
-uint8_t lsrColorG[LED_COUNT];                   // Zwischenspeicher des Grün-Wertes für alle LEDs
-uint8_t lsrColorB[LED_COUNT];                   // Zwischenspeicher des Blau-Wertes für alle LEDs
-
-#endif
-
+ // ########################################### setup #######################################################
 void setup() {
 
   Serial.begin(115200); // Es gibt ein paar Debug Ausgaben über die serielle Schnittstelle
@@ -850,14 +842,14 @@ void setup() {
   Serial.println(F("    | |/ _ \| '_ \| |\/| | |  | |  _ < | | | |     "));
   Serial.println(F("    | | (_) | | | | |  | | |__| | |_) || |_| |____ "));
   Serial.println(F("    |_|\___/|_| |_|_|  |_|\____/|____/_____|______|"));
-  Serial.println(F("TonMOBIL Version 1.1"));
-  Serial.println(F("Weiterentwicklung Harald Woizischke"));
-  Serial.println(F("basiert auf TonUINO Version 2.1 von Torsten Voss https://tonuino.de"));
+  Serial.println(F(" "));
+  Serial.print(F("TonMOBIL Version "));Serial.println(version);
+  Serial.println(F("Harald Woizischke"));
+  Serial.println(F(" "));
+  Serial.println(F("Weiterentwicklung von TonUINO Version 2.1, Torsten Voss https://tonuino.de"));
   Serial.println(F("Lizenziert unter GNU/GPL"));
   Serial.println(F("Projektrepository https://github.com/hwoiz/TonMOBIL"));
   Serial.print(F("Flashversion "));Serial.print(__DATE__);Serial.print(F("  "));Serial.println(__TIME__);
-
-
 
 
   // Busy Pin
@@ -872,6 +864,7 @@ void setup() {
 #ifdef LED_SR
     strip.begin();
     strip.setBrightness(30);
+    strip.fill(30,0,LED_COUNT);
     strip.show();
 
     loopCountdown = 0;
