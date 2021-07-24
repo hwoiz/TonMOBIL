@@ -27,17 +27,42 @@ char version[] = "1.3";
 #include <avr/sleep.h>
 #include <Adafruit_NeoPixel.h>
 
-// LED Strip
-#define LED_PIN    6       // Der Pin am Arduino vom dem das Daten Signal rausgeht
-#define LED_COUNT 15       // Anzahl an LEDs im Ring oder Strip
+// Konstanten
+#define LED_PIN    6       // Daten Signal LED Strip
+#define LED_COUNT 15       // Anzahl an LEDs im Strip
 #define LED_BRIGTNESS 30   // Helligkeit der LED-Statusleiste
-//#define FIVEBUTTONS      // uncomment the below line to enable five button support
-#define POLOLUSWITCH       // uncomment the below line to flip the shutdown pin logic
+#define POLOLUSWITCH       // Für Pololu-Switch auskommentiren
+#define RST_PIN 9          // RST-Pin MFRC522
+#define SS_PIN 10          // SS-Pin  MFRC522
+#define LONG_PRESS 1000    // Langer Tastendruck >Millisekunden
+#define buttonPause A0     // Pin Play/Pause Taste
+#define buttonUp A1        // Pin Up/Next Taste
+#define buttonDown A2      // Pin Down/Prev Taste
+#define busyPin 4          // busy-Pin vom MFRC522
+#define shutdownPin 7      // Pin für Shutdown (Pololo oder MOSFET
+#define openAnalogPin A7   // Pin zum Erzeugen einer Zufallszahl aus Rauschen
+//#define FIVEBUTTONS      // Für Steuerung mit 5 Tasten auskommentieren
+#ifdef FIVEBUTTONS
+#define buttonFourPin A3   // Pin für UP Taste
+#define buttonFivePin A4   // Pin für Down Taste
+#endif
 
-// Declare NeoPixel strip object:
+// Objekt für LED Strip
 Adafruit_NeoPixel strip(LED_COUNT, LED_PIN, NEO_GRB + NEO_KHZ800);
 
-// Zählvarbiablen
+// Objekt für DFPlayer Mini
+SoftwareSerial mySoftwareSerial(3, 2); // RX, TX
+
+// Objekt für MFRC522 NFC-Leser
+MFRC522 mfrc522(SS_PIN, RST_PIN); // Create MFRC522
+MFRC522::MIFARE_Key key;
+MFRC522::StatusCode status;
+
+// Variablen
+bool successRead;
+byte sector = 1;
+byte blockAddr = 4;
+byte trailerBlock = 7;
 uint16_t loopCountdown;       // Runterzählen der Loops
 uint16_t lsrLoopCountWait;    // Definierte Anzahl wieviele Loops runtergezählt werden sollen, also wie lange gewartet wird
 uint8_t animationCountdown;   // Wie oft die einmalige Animation ausgeführt wird bevor es zurück in die Hauptschleife (Animationsmodus 0) geht
@@ -45,8 +70,6 @@ uint8_t x;
 uint8_t y;
 uint8_t z;
 uint8_t i;
-
-// Datenvarbiablen
 uint32_t lsrColorUp = strip.Color(0, 255, 0);   // Farbe wird bei Animation nächstes Lied verwendet
 uint32_t lsrColorDown = strip.Color(0, 0, 255); // Farbe wird bei Animation Lied zurück verwendet
 uint8_t currentDetectedVolume;                  // Speichern der aktuellen Lautstärke für späteren Vergleich
@@ -62,18 +85,18 @@ uint32_t lsrColors;                             // Zwischenspeicher einer Farbe
 uint8_t lsrColorR[LED_COUNT];                   // Zwischenspeicher des Rot-Wertes für alle LEDs
 uint8_t lsrColorG[LED_COUNT];                   // Zwischenspeicher des Grün-Wertes für alle LEDs
 uint8_t lsrColorB[LED_COUNT];                   // Zwischenspeicher des Blau-Wertes für alle LEDs
-
-
 static const uint32_t cardCookie = 322417479;
-
-// DFPlayer Mini
-SoftwareSerial mySoftwareSerial(3, 2); // RX, TX
+bool knownCard = false;
+bool ansage = false;
+unsigned long sleepAtMillis = 0;
+static uint16_t _lastTrackFinished;
 uint16_t numTracksInFolder;
 uint16_t currentTrack;
 uint16_t firstTrack;
 uint8_t queue[255];
 uint8_t volume;
 
+// Struktur Albumkennung
 struct folderSettings {
   uint8_t folder;
   uint8_t mode;
@@ -81,7 +104,7 @@ struct folderSettings {
   uint8_t special2;
 };
 
-// this object stores nfc tag data
+// Struktur NFC Data
 struct nfcTagObject {
   uint32_t cookie;
   uint8_t version;
@@ -92,7 +115,7 @@ struct nfcTagObject {
   //  uint8_t special2;
 };
 
-// admin settings stored in eeprom
+// Admin Setting in eeprom-Speicher
 struct adminSettings {
   uint32_t cookie;
   byte version;
@@ -111,19 +134,113 @@ struct adminSettings {
 adminSettings mySettings;
 nfcTagObject myCard;
 folderSettings *myFolder;
-unsigned long sleepAtMillis = 0;
-static uint16_t _lastTrackFinished;
+
 
 static void nextTrack(uint16_t track);
-uint8_t voiceMenu(int numberOfOptions, int startMessage, int messageOffset,
-                  bool preview = false, int previewFromFolder = 0, int defaultValue = 0, bool exitWithLongPress = false);
+uint8_t voiceMenu(int numberOfOptions, int startMessage, int messageOffset, bool preview = false, int previewFromFolder = 0, int defaultValue = 0, bool exitWithLongPress = false);
 bool isPlaying();
 bool checkTwo ( uint8_t a[], uint8_t b[] );
 void writeCard(nfcTagObject nfcTag);
 void dump_byte_array(byte * buffer, byte bufferSize);
 void adminMenu(bool fromCard = false);
-bool knownCard = false;
-bool ansage = false;
+
+void shuffleQueue() {
+  // Queue für die Zufallswiedergabe erstellen
+  for (uint8_t x = 0; x < numTracksInFolder - firstTrack + 1; x++)
+    queue[x] = x + firstTrack;
+  // Rest mit 0 auffüllen
+  for (uint8_t x = numTracksInFolder - firstTrack + 1; x < 255; x++)
+    queue[x] = 0;
+  // Queue mischen
+  for (uint8_t i = 0; i < numTracksInFolder - firstTrack + 1; i++)
+  {
+    uint8_t j = random (0, numTracksInFolder - firstTrack + 1);
+    uint8_t t = queue[i];
+    queue[i] = queue[j];
+    queue[j] = t;
+  }
+}
+void writeSettingsToFlash() {
+  Serial.println(F("=== writeSettingsToFlash()"));
+  int address = sizeof(myFolder->folder) * 100;
+  EEPROM.put(address, mySettings);
+}
+void resetSettings() {
+  Serial.println(F("=== resetSettings()"));
+  mySettings.cookie = cardCookie;
+  mySettings.version = 2;
+  mySettings.maxVolume = 25;
+  mySettings.minVolume = 2;
+  mySettings.initVolume = 15;
+  mySettings.eq = 1;
+  mySettings.locked = false;
+  mySettings.standbyTimer = 5;
+  mySettings.invertVolumeButtons = true;
+  mySettings.shortCuts[0].folder = 0;
+  mySettings.shortCuts[1].folder = 0;
+  mySettings.shortCuts[2].folder = 0;
+  mySettings.shortCuts[3].folder = 0;
+  mySettings.adminMenuLocked = 0;
+  mySettings.adminMenuPin[0] = 1;
+  mySettings.adminMenuPin[1] = 1;
+  mySettings.adminMenuPin[2] = 1;
+  mySettings.adminMenuPin[3] = 1;
+  writeSettingsToFlash();
+}
+void migrateSettings(int oldVersion) {
+  if (oldVersion == 1) {
+    Serial.println(F("=== resetSettings()"));
+    Serial.println(F("1 -> 2"));
+    mySettings.version = 2;
+    mySettings.adminMenuLocked = 0;
+    mySettings.adminMenuPin[0] = 1;
+    mySettings.adminMenuPin[1] = 1;
+    mySettings.adminMenuPin[2] = 1;
+    mySettings.adminMenuPin[3] = 1;
+    writeSettingsToFlash();
+  }
+}
+void loadSettingsFromFlash() {
+  Serial.println(F("=== loadSettingsFromFlash()"));
+  int address = sizeof(myFolder->folder) * 100;
+  EEPROM.get(address, mySettings);
+  if (mySettings.cookie != cardCookie)
+    resetSettings();
+  migrateSettings(mySettings.version);
+
+  Serial.print(F("Version: "));
+  Serial.println(mySettings.version);
+
+  Serial.print(F("Maximal Volume: "));
+  Serial.println(mySettings.maxVolume);
+
+  Serial.print(F("Minimal Volume: "));
+  Serial.println(mySettings.minVolume);
+
+  Serial.print(F("Initial Volume: "));
+  Serial.println(mySettings.initVolume);
+
+  Serial.print(F("EQ: "));
+  Serial.println(mySettings.eq);
+
+  Serial.print(F("Locked: "));
+  Serial.println(mySettings.locked);
+
+  Serial.print(F("Sleep Timer: "));
+  Serial.println(mySettings.standbyTimer);
+
+  Serial.print(F("Inverted Volume Buttons: "));
+  Serial.println(mySettings.invertVolumeButtons);
+
+  Serial.print(F("Admin Menu locked: "));
+  Serial.println(mySettings.adminMenuLocked);
+
+  Serial.print(F("Admin Menu Pin: "));
+  Serial.print(mySettings.adminMenuPin[0]);
+  Serial.print(mySettings.adminMenuPin[1]);
+  Serial.print(mySettings.adminMenuPin[2]);
+  Serial.println(mySettings.adminMenuPin[3]);
+}
 
 // implement a notification class,
 // its member methods will get called
@@ -209,110 +326,7 @@ class Mp3Notify {
       PrintlnSourceAction(source, "entfernt");
     }
 };
-
 static DFMiniMp3<SoftwareSerial, Mp3Notify> mp3(mySoftwareSerial);
-
-void shuffleQueue() {
-  // Queue für die Zufallswiedergabe erstellen
-  for (uint8_t x = 0; x < numTracksInFolder - firstTrack + 1; x++)
-    queue[x] = x + firstTrack;
-  // Rest mit 0 auffüllen
-  for (uint8_t x = numTracksInFolder - firstTrack + 1; x < 255; x++)
-    queue[x] = 0;
-  // Queue mischen
-  for (uint8_t i = 0; i < numTracksInFolder - firstTrack + 1; i++)
-  {
-    uint8_t j = random (0, numTracksInFolder - firstTrack + 1);
-    uint8_t t = queue[i];
-    queue[i] = queue[j];
-    queue[j] = t;
-  }
-}
-
-void writeSettingsToFlash() {
-  Serial.println(F("=== writeSettingsToFlash()"));
-  int address = sizeof(myFolder->folder) * 100;
-  EEPROM.put(address, mySettings);
-}
-
-void resetSettings() {
-  Serial.println(F("=== resetSettings()"));
-  mySettings.cookie = cardCookie;
-  mySettings.version = 2;
-  mySettings.maxVolume = 25;
-  mySettings.minVolume = 2;
-  mySettings.initVolume = 15;
-  mySettings.eq = 1;
-  mySettings.locked = false;
-  mySettings.standbyTimer = 5;
-  mySettings.invertVolumeButtons = true;
-  mySettings.shortCuts[0].folder = 0;
-  mySettings.shortCuts[1].folder = 0;
-  mySettings.shortCuts[2].folder = 0;
-  mySettings.shortCuts[3].folder = 0;
-  mySettings.adminMenuLocked = 0;
-  mySettings.adminMenuPin[0] = 1;
-  mySettings.adminMenuPin[1] = 1;
-  mySettings.adminMenuPin[2] = 1;
-  mySettings.adminMenuPin[3] = 1;
-  writeSettingsToFlash();
-}
-
-void migrateSettings(int oldVersion) {
-  if (oldVersion == 1) {
-    Serial.println(F("=== resetSettings()"));
-    Serial.println(F("1 -> 2"));
-    mySettings.version = 2;
-    mySettings.adminMenuLocked = 0;
-    mySettings.adminMenuPin[0] = 1;
-    mySettings.adminMenuPin[1] = 1;
-    mySettings.adminMenuPin[2] = 1;
-    mySettings.adminMenuPin[3] = 1;
-    writeSettingsToFlash();
-  }
-}
-
-void loadSettingsFromFlash() {
-  Serial.println(F("=== loadSettingsFromFlash()"));
-  int address = sizeof(myFolder->folder) * 100;
-  EEPROM.get(address, mySettings);
-  if (mySettings.cookie != cardCookie)
-    resetSettings();
-  migrateSettings(mySettings.version);
-
-  Serial.print(F("Version: "));
-  Serial.println(mySettings.version);
-
-  Serial.print(F("Maximal Volume: "));
-  Serial.println(mySettings.maxVolume);
-
-  Serial.print(F("Minimal Volume: "));
-  Serial.println(mySettings.minVolume);
-
-  Serial.print(F("Initial Volume: "));
-  Serial.println(mySettings.initVolume);
-
-  Serial.print(F("EQ: "));
-  Serial.println(mySettings.eq);
-
-  Serial.print(F("Locked: "));
-  Serial.println(mySettings.locked);
-
-  Serial.print(F("Sleep Timer: "));
-  Serial.println(mySettings.standbyTimer);
-
-  Serial.print(F("Inverted Volume Buttons: "));
-  Serial.println(mySettings.invertVolumeButtons);
-
-  Serial.print(F("Admin Menu locked: "));
-  Serial.println(mySettings.adminMenuLocked);
-
-  Serial.print(F("Admin Menu Pin: "));
-  Serial.print(mySettings.adminMenuPin[0]);
-  Serial.print(mySettings.adminMenuPin[1]);
-  Serial.print(mySettings.adminMenuPin[2]);
-  Serial.println(mySettings.adminMenuPin[3]);
-}
 
 class Modifier {
   public:
@@ -348,7 +362,6 @@ class Modifier {
 
     }
 };
-
 Modifier *activeModifier = NULL;
 
 class SleepTimer: public Modifier {
@@ -566,7 +579,6 @@ class RepeatSingleModifier: public Modifier {
       return 6;
     }
 };
-
 // An modifier can also do somethings in addition to the modified action
 // by returning false (not handled) at the end
 // This simple FeedbackModifier will tell the volume before changing it and
@@ -717,31 +729,6 @@ static void previousTrack() {
   delay(1000);
 }
 
-// MFRC522
-#define RST_PIN 9                 // Configurable, see typical pin layout above
-#define SS_PIN 10                 // Configurable, see typical pin layout above
-MFRC522 mfrc522(SS_PIN, RST_PIN); // Create MFRC522
-MFRC522::MIFARE_Key key;
-bool successRead;
-byte sector = 1;
-byte blockAddr = 4;
-byte trailerBlock = 7;
-MFRC522::StatusCode status;
-
-#define buttonPause A0
-#define buttonUp A1
-#define buttonDown A2
-#define busyPin 4
-#define shutdownPin 7
-#define openAnalogPin A7
-
-#ifdef FIVEBUTTONS
-#define buttonFourPin A3
-#define buttonFivePin A4
-#endif
-
-#define LONG_PRESS 1000
-
 Button pauseButton(buttonPause);
 Button upButton(buttonUp);
 Button downButton(buttonDown);
@@ -756,63 +743,6 @@ bool ignoreDownButton = false;
 bool ignoreButtonFour = false;
 bool ignoreButtonFive = false;
 #endif
-
-/// Funktionen für den Standby Timer (z.B. über Pololu-Switch oder Mosfet)
-
-void setstandbyTimer() {
-  Serial.print(F("=== setstandbyTimer() Wert="));  Serial.println(mySettings.standbyTimer);
-  if (mySettings.standbyTimer != 0)
-    sleepAtMillis = millis() + (mySettings.standbyTimer * 60 * 1000);
-  else
-    sleepAtMillis = 0;
-  Serial.println(sleepAtMillis);
-}
-
-void disablestandbyTimer() {
-  Serial.println(F("=== disablestandby()"));
-  sleepAtMillis = 0;
-}
-
-void checkStandbyAtMillis() {
-  if (sleepAtMillis != 0 && millis() > sleepAtMillis) {
-    Serial.println(F("=== power off!"));
-    // enter sleep state
-#if defined POLOLUSWITCH
-    digitalWrite(shutdownPin, HIGH);
-#else
-    digitalWrite(shutdownPin, LOW);
-#endif
-    delay(500);
-
-    // http://discourse.voss.earth/t/intenso-s10000-powerbank-automatische-abschaltung-software-only/805
-    // powerdown to 27mA (powerbank switches off after 30-60s)
-    mfrc522.PCD_AntennaOff();
-    mfrc522.PCD_SoftPowerDown();
-    mp3.sleep();
-
-    set_sleep_mode(SLEEP_MODE_PWR_DOWN);
-    cli();  // Disable interrupts
-    sleep_mode();
-  }
-}
-
-bool isPlaying() {
-  return !digitalRead(busyPin);
-}
-
-void waitForTrackToFinish() {
-  long currentTime = millis();
-#define TIMEOUT 1000
-  do {
-    mp3.loop();
-  } while (!isPlaying() && millis() < currentTime + TIMEOUT);
-  delay(1000);
-  do {
-    mp3.loop();
-  } while (isPlaying());
-}
-
-
 // ########################################### setup #######################################################
 void setup() {
 
@@ -1274,6 +1204,57 @@ void loop() {
 // ################################ Ende der Hauptschleife ###############################
 
 // ################################ Funktionen ##############################################
+// Standby Timer (z.B. über Pololu-Switch oder Mosfet)
+void setstandbyTimer() {
+  Serial.print(F("=== setstandbyTimer() Wert="));  Serial.println(mySettings.standbyTimer);
+  if (mySettings.standbyTimer != 0)
+    sleepAtMillis = millis() + (mySettings.standbyTimer * 60 * 1000);
+  else
+    sleepAtMillis = 0;
+  Serial.println(sleepAtMillis);
+}
+void disablestandbyTimer() {
+  Serial.println(F("=== disablestandby()"));
+  sleepAtMillis = 0;
+}
+void checkStandbyAtMillis() {
+  if (sleepAtMillis != 0 && millis() > sleepAtMillis) {
+    Serial.println(F("=== power off!"));
+    // enter sleep state
+#if defined POLOLUSWITCH
+    digitalWrite(shutdownPin, HIGH);
+#else
+    digitalWrite(shutdownPin, LOW);
+#endif
+    delay(500);
+
+    // http://discourse.voss.earth/t/intenso-s10000-powerbank-automatische-abschaltung-software-only/805
+    // powerdown to 27mA (powerbank switches off after 30-60s)
+    mfrc522.PCD_AntennaOff();
+    mfrc522.PCD_SoftPowerDown();
+    mp3.sleep();
+
+    set_sleep_mode(SLEEP_MODE_PWR_DOWN);
+    cli();  // Disable interrupts
+    sleep_mode();
+  }
+}
+
+// Überwachen des Wiedergabestatus
+bool isPlaying() {
+  return !digitalRead(busyPin);
+}
+void waitForTrackToFinish() {
+  long currentTime = millis();
+#define TIMEOUT 1000
+  do {
+    mp3.loop();
+  } while (!isPlaying() && millis() < currentTime + TIMEOUT);
+  delay(1000);
+  do {
+    mp3.loop();
+  } while (isPlaying());
+}
 // Tasten abfragen
 void readButtons() {
   pauseButton.read();
