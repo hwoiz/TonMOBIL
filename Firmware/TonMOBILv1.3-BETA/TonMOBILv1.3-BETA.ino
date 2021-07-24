@@ -1,22 +1,22 @@
 /*
-    _______          __  __  ____  ____ _____ _      
-   |__   __|        |  \/  |/ __ \|  _ \_   _| |     
-      | | ___  _ __ | \  / | |  | | |_) || | | |     
-      | |/ _ \| '_ \| |\/| | |  | |  _ < | | | |     
-      | | (_) | | | | |  | | |__| | |_) || |_| |____ 
+    _______          __  __  ____  ____ _____ _
+   |__   __|        |  \/  |/ __ \|  _ \_   _| |
+      | | ___  _ __ | \  / | |  | | |_) || | | |
+      | |/ _ \| '_ \| |\/| | |  | |  _ < | | | |
+      | | (_) | | | | |  | | |__| | |_) || |_| |____
       |_|\___/|_| |_|_|  |_|\____/|____/_____|______|
 
-  
-  Harald Woizischke 
+
+  Harald Woizischke
   Lizensiert unter GNU/GPL
   https://github.com/hwoiz/TonMOBIL
-   
-  Weiterentwicklung von TonUINO Version 2.1 
+
+  Weiterentwicklung von TonUINO Version 2.1
   created by Thorsten Voß and licensed under GNU/GPL.
-  Information and contribution at https://tonuino.de. 
+  Information and contribution at https://tonuino.de.
 */
 
-char version[] = "1.2";
+char version[] = "1.3";
 
 #include <DFMiniMp3.h>
 #include <EEPROM.h>
@@ -28,8 +28,11 @@ char version[] = "1.2";
 #include <Adafruit_NeoPixel.h>
 
 // LED Strip
-#define LED_PIN    6              // Der Pin am Arduino vom dem das Daten Signal rausgeht
-#define LED_COUNT 15              // Anzahl an LEDs im Ring oder Strip
+#define LED_PIN    6       // Der Pin am Arduino vom dem das Daten Signal rausgeht
+#define LED_COUNT 15       // Anzahl an LEDs im Ring oder Strip
+#define LED_BRIGTNESS 30   // Helligkeit der LED-Statusleiste
+//#define FIVEBUTTONS      // uncomment the below line to enable five button support
+#define POLOLUSWITCH       // uncomment the below line to flip the shutdown pin logic
 
 // Declare NeoPixel strip object:
 Adafruit_NeoPixel strip(LED_COUNT, LED_PIN, NEO_GRB + NEO_KHZ800);
@@ -60,11 +63,6 @@ uint8_t lsrColorR[LED_COUNT];                   // Zwischenspeicher des Rot-Wert
 uint8_t lsrColorG[LED_COUNT];                   // Zwischenspeicher des Grün-Wertes für alle LEDs
 uint8_t lsrColorB[LED_COUNT];                   // Zwischenspeicher des Blau-Wertes für alle LEDs
 
-// uncomment the below line to enable five button support
-//#define FIVEBUTTONS
-
-// uncomment the below line to flip the shutdown pin logic
-#define POLOLUSWITCH
 
 static const uint32_t cardCookie = 322417479;
 
@@ -189,7 +187,7 @@ class Mp3Notify {
       }
       Serial.println(F(" error"));
     }
- 
+
     static void PrintlnSourceAction(DfMp3_PlaySources source, const char* action) {
       if (source & DfMp3_PlaySources_Sd) Serial.print("SD Karte ");
       if (source & DfMp3_PlaySources_Usb) Serial.print("USB ");
@@ -551,10 +549,10 @@ class RepeatSingleModifier: public Modifier {
       Serial.println(F("== RepeatSingleModifier::handleNext() -> REPEAT CURRENT TRACK"));
       delay(50);
       if (isPlaying()) return true;
-      if (myFolder->mode == 3 || myFolder->mode == 9){
+      if (myFolder->mode == 3 || myFolder->mode == 9) {
         mp3.playFolderTrack(myFolder->folder, queue[currentTrack - 1]);
       }
-      else{
+      else {
         mp3.playFolderTrack(myFolder->folder, currentTrack);
       }
       _lastTrackFinished = 0;
@@ -780,9 +778,9 @@ void checkStandbyAtMillis() {
     Serial.println(F("=== power off!"));
     // enter sleep state
 #if defined POLOLUSWITCH
-        digitalWrite(shutdownPin, HIGH);
+    digitalWrite(shutdownPin, HIGH);
 #else
-        digitalWrite(shutdownPin, LOW);
+    digitalWrite(shutdownPin, LOW);
 #endif
     delay(500);
 
@@ -815,15 +813,15 @@ void waitForTrackToFinish() {
 }
 
 
- // ########################################### setup #######################################################
+// ########################################### setup #######################################################
 void setup() {
 
   Serial.begin(115200); // Es gibt ein paar Debug Ausgaben über die serielle Schnittstelle
- 
+
   // RGB-Statusleiste initialisieren
   strip.begin();
-  strip.setBrightness(30);
-  strip.fill(30,0,LED_COUNT);
+  strip.setBrightness(LED_BRIGTNESS);
+  strip.fill(30, 0, LED_COUNT);
   strip.show();
   loopCountdown = 0;
   animationCountdown = 1;
@@ -846,13 +844,13 @@ void setup() {
   Serial.println(F("    | | (_) | | | | |  | | |__| | |_) || |_| |____ "));
   Serial.println(F("    |_|\___/|_| |_|_|  |_|\____/|____/_____|______|"));
   Serial.println(F(" "));
-  Serial.print(F("TonMOBIL Version "));Serial.println(version);
+  Serial.print(F("TonMOBIL Version ")); Serial.println(version);
   Serial.println(F("Harald Woizischke"));
   Serial.println(F(" "));
   Serial.println(F("Weiterentwicklung von TonUINO Version 2.1, Torsten Voss https://tonuino.de"));
   Serial.println(F("Lizenziert unter GNU/GPL"));
   Serial.println(F("Projektrepository https://github.com/hwoiz/TonMOBIL"));
-  Serial.print(F("Flashversion "));Serial.print(__DATE__);Serial.print(F("  "));Serial.println(__TIME__);
+  Serial.print(F("Flashversion ")); Serial.print(__DATE__); Serial.print(F("  ")); Serial.println(__TIME__);
 
   // Busy Pin MP3Player initialisieren
   pinMode(busyPin, INPUT);
@@ -862,7 +860,7 @@ void setup() {
 
   // Standby-Timer aktivieren
   setstandbyTimer();
-  
+
   // DFPlayer Mini initialisieren
   mp3.begin();
   Serial.println(F("Init MP3-Player"));
@@ -880,7 +878,7 @@ void setup() {
   for (byte i = 0; i < 6; i++) {
     key.keyByte[i] = 0xFF;
   }
-  
+
   // Tasten initialisieren
   Serial.println(F("Init Button"));
   pinMode(buttonPause, INPUT_PULLUP);
@@ -911,12 +909,371 @@ void setup() {
     loadSettingsFromFlash();
   }
 
-  //Start "Shortcut at Startup"  
+  //Start "Shortcut at Startup"
   playShortCut(3);
 
   Serial.println(F("TonUINO ready"));
 }
 
+
+// ############################################  Programm - Hauptschleife #################################################
+void loop() {
+  do {
+    checkStandbyAtMillis();
+    mp3.loop();
+    // Modifier : WIP!
+    if (activeModifier != NULL) {
+      activeModifier->loop();
+    }
+    // ----------   Liedänderung erkennen und LED-Animation aktivieren   ---------- //
+    currentDetectedTrack = currentTrack;
+    if (currentDetectedTrack != lastDetectedTrack) {
+      strip.clear();
+      if (currentTrack > lastDetectedTrack) { //nächstes Titel
+        lsrAnimationTrackMode = 1;
+        lsrColors = lsrColorUp;
+      }
+      if (currentTrack < lastDetectedTrack) { // vorheriger Titel
+        lsrAnimationTrackMode = 2;
+        lsrColors = lsrColorDown;
+      }
+      lsrAnimationMode = 1;
+      animationCountdown = strip.numPixels();
+      lsrLoopCountWait = 5; // Geschwindigkeit der Animation, desto größer desto langsamer
+      y = 0;
+    }
+    // ----------    Lautstärkenanpassung erkennen und Animation aktivieren    ---------- //
+    currentDetectedVolume = volume;
+    if (currentDetectedVolume != lastDetectedVolume) {
+      lsrAnimationMode = 2;
+      animationCountdown = strip.numPixels();
+      lsrLoopCountWait = 6;
+      y = 0;
+    }
+    // ----------   Loop Animation: Default Mode   ---------- //
+    if (lsrAnimationMode == 0 && loopCountdown == 0 && isPlaying() == false && knownCard == false) {
+      lsrLoopCountWait = 1; // Geschwindigkeit der Animation, desto größer desto langsamer
+      // Farbe & Animation definieren: Alle LEDs leuchten alle abwechselnd  im hue Spektrum
+      y++;
+      if (y >= (strip.numPixels() * 8) ) {
+        y = 0;
+      }
+      strip.fill(strip.ColorHSV((y * 65536 / strip.numPixels() / 8) , 255, 30), 0, 0);
+      strip.show();
+      loopCountdown = lsrLoopCountWait;
+    }
+    // ----------   Loop Animation: Musik spielt   ---------- //
+    if (lsrAnimationMode == 0 && loopCountdown == 0 && isPlaying() == true && knownCard == true) {
+      lsrLoopCountWait = 5; // Geschwindigkeit der Animation, desto größer desto langsamer
+      // Fabre definieren: hue Spektrum (Rainbow)
+      do {
+        for (i = 0; i < strip.numPixels(); i++) {
+          lsrColors = strip.ColorHSV(i * 65536 / strip.numPixels(), 255, 30);
+          strip.setPixelColor(i, lsrColors);
+          lsrColorR[i] = (lsrColors >> 16 & 0xFF);
+          lsrColorG[i] = (lsrColors >> 8 & 0xFF);
+          lsrColorB[i] = (lsrColors & 0xFF);
+        }
+        x++;
+      } while (x < strip.numPixels());
+      // Animation definieren: Rotation im Uhrzeigersinn
+      y++;
+      x = 0;
+      if (y >= strip.numPixels()) {
+        y = 0;
+      }
+      do {
+        for (i = 0; i < strip.numPixels(); i++) {
+          strip.setPixelColor((i + y) % strip.numPixels(), lsrColorR[i], lsrColorG[i], lsrColorB[i]);
+        }
+        x++;
+      } while (x < strip.numPixels());
+      strip.show();
+      loopCountdown = lsrLoopCountWait;
+    }
+    // ----------   Loop Animation: Musik pausiert   ---------- //
+    if (lsrAnimationMode == 0 && loopCountdown == 0 && isPlaying() == false && knownCard == true) {
+      lsrLoopCountWait = 7; // Geschwindigkeit der Animation, desto größer desto langsamer
+      strip.clear();   // Danach wandert nur nur ein Punkt
+      // Farbe definieren: hue Spektrum (Rainbow)
+      x = 0;
+      do {
+        for (i = 0; i < strip.numPixels(); i++) {
+          lsrColors = strip.ColorHSV(i * 65536 / strip.numPixels(), 255, 30);
+          lsrColorR[i] = (lsrColors >> 16 & 0xFF);
+          lsrColorG[i] = (lsrColors >> 8 & 0xFF);
+          lsrColorB[i] = (lsrColors & 0xFF);
+        }
+        x++;
+      } while (x < strip.numPixels());
+      // Farbe definieren: Füllend ansteigend
+      y++;
+      if (y >= strip.numPixels()) {
+        y = 0;
+        z++;
+        strip.clear();
+      }
+      if (z >= strip.numPixels()) {
+        z = 0;
+      }
+      x = 0;
+      do {
+        for (i = 0; i < y + 1 ; i++) {
+          strip.setPixelColor( y , lsrColorR[y], lsrColorG[y], lsrColorB[y]);
+        }
+        x++;
+      } while (x < y + 1);
+      strip.show();
+      loopCountdown = lsrLoopCountWait;
+    }
+    // ----------   Einmalige Animation: Liedänderung    ---------- //
+    if (lsrAnimationMode == 1 && loopCountdown == 0) {
+      // Fabre definieren: oben definiert
+      x = 0;
+      do  {
+        for (i = 0; i < strip.numPixels(); i++) {
+          lsrColorR[i] = (lsrColors >> 16 & 0xFF);
+          lsrColorG[i] = (lsrColors >> 8 & 0xFF);
+          lsrColorB[i] = (lsrColors & 0xFF);
+        }
+        x++;
+      } while (x < strip.numPixels());
+      // Animation definieren: oben definiert
+      if (y >= strip.numPixels()) {
+        strip.clear();
+        y = 0;
+      }
+      if (lsrAnimationTrackMode == 1) {
+        z = y ;
+      }
+      if (lsrAnimationTrackMode == 2) {
+        z = strip.numPixels() - y ;
+      }
+      x = 0;
+      do {
+        for (i = 0; i < y + 1 ; i++) {
+          strip.setPixelColor( z , lsrColorR[y], lsrColorG[y], lsrColorB[y]);
+        }
+        x++;
+      } while (x < y + 1);
+      y++;
+      strip.show();
+      if (animationCountdown != 0) {
+        animationCountdown--;
+      }
+      if (animationCountdown == 0) {
+        lsrAnimationMode = 0;
+      }
+      loopCountdown = lsrLoopCountWait ;
+    }
+    // ----------   Einmalige Animation: Prozentuale Lautstärkenanpassung   ---------- //
+    if (lsrAnimationMode == 2 && loopCountdown == 0) {
+      if (animationCountdown != 0) {
+        animationCountdown--;
+      }
+      if (currentDetectedVolume != lastDetectedVolume) {
+        lsrLoopCountWait = 5;
+      }
+      volumeScope = (mySettings.maxVolume - mySettings.minVolume);
+      volumeScopeAmount = (volume - mySettings.minVolume) * (LED_COUNT - 1) / volumeScope; // Lautstärkenanzeige angepasst an die Anzahl der LEDs
+      // Fabre definieren: von grün zu rot
+      x = 0;
+      do {
+        for (i = 0; i < strip.numPixels(); i++) {
+          lsrHueCalc = 21000 / (strip.numPixels() - 1) / (strip.numPixels() - 1);
+          lsrColors = strip.ColorHSV(((strip.numPixels() - 1) - i) * (strip.numPixels() - 1) * lsrHueCalc, 255, 30);
+          strip.setPixelColor(i, lsrColors);
+          lsrColorR[i] = (lsrColors >> 16 & 0xFF);
+          lsrColorG[i] = (lsrColors >> 8 & 0xFF);
+          lsrColorB[i] = (lsrColors & 0xFF);
+        }
+        x++;
+      } while (x < strip.numPixels());
+      // Animation definieren: Prozentuale Lautstärkenanpassung
+      strip.clear();
+      x = 0;
+      do {
+        for (i = 0; i < volumeScopeAmount + 1; i++) {
+          strip.setPixelColor(i, lsrColorR[i], lsrColorG[i], lsrColorB[i]);
+        }
+        x++;
+      } while (x < (volumeScopeAmount + 1));
+      strip.show();
+      if (animationCountdown == 0) {
+        //delay(20);
+        lsrAnimationMode = 0;
+      }
+      loopCountdown = lsrLoopCountWait;
+    }
+    // ----------   Countdown Zähler über den loop als ersatz zur delay Funktion   ----------
+    if (loopCountdown != 0 ) {
+      loopCountdown--;
+    }
+    // ----------   Dadurch wird die Änderung der Lautstärke bzw. Track nur ein mal registiert   ----------
+    lastDetectedVolume = currentDetectedVolume;
+    lastDetectedTrack = currentDetectedTrack;
+    // Buttons werden nun über JS_Button gehandelt, dadurch kann jede Taste doppelt belegt werden
+    readButtons();
+    // admin menu
+    if ((pauseButton.pressedFor(LONG_PRESS) || upButton.pressedFor(LONG_PRESS) || downButton.pressedFor(LONG_PRESS)) && pauseButton.isPressed() && upButton.isPressed() && downButton.isPressed()) {
+      mp3.pause();
+      do {
+        readButtons();
+      } while (pauseButton.isPressed() || upButton.isPressed() || downButton.isPressed());
+      readButtons();
+      adminMenu();
+      break;
+    }
+    if (pauseButton.wasReleased()) {
+      if (activeModifier != NULL) {
+        if (activeModifier->handlePause() == true) {
+          return;
+        }
+        if (ignorePauseButton == false) {
+          if (isPlaying()) {
+            mp3.pause();
+            setstandbyTimer();
+          }
+          else if (knownCard) {
+            mp3.start();
+            disablestandbyTimer();
+          }
+        }
+        ignorePauseButton = false;
+      }
+    }
+    else if (pauseButton.pressedFor(LONG_PRESS) && ignorePauseButton == false) {
+      if (activeModifier != NULL) {
+        if (activeModifier->handlePause() == true) {
+          return;
+        }
+      }
+      if (isPlaying()) {
+        uint8_t advertTrack;
+        if (myFolder->mode == 3 || myFolder->mode == 9) {
+          advertTrack = (queue[currentTrack - 1]);
+        }
+        else {
+          advertTrack = currentTrack;
+        }
+        // Spezialmodus Von-Bis für Album und Party gibt die Dateinummer relativ zur Startposition wieder
+        if (myFolder->mode == 8 || myFolder->mode == 9) {
+          advertTrack = advertTrack - myFolder->special + 1;
+        }
+        mp3.playAdvertisement(advertTrack);
+      }
+      else {
+        playShortCut(0);
+      }
+      ignorePauseButton = true;
+    }
+    if (upButton.pressedFor(LONG_PRESS)) {
+#ifndef FIVEBUTTONS
+      if (isPlaying()) {
+        if (!mySettings.invertVolumeButtons) {
+          volumeUpButton();
+        }
+        else {
+          nextButton();
+        }
+      }
+      else {
+        playShortCut(1);
+      }
+      ignoreUpButton = true;
+#endif
+    } else if (upButton.wasReleased()) {
+      if (!ignoreUpButton) {
+        if (!mySettings.invertVolumeButtons) {
+          nextButton();
+        }
+      }
+      else {
+        volumeUpButton();
+      }
+      ignoreUpButton = false;
+    }
+    if (downButton.pressedFor(LONG_PRESS)) {
+#ifndef FIVEBUTTONS
+      if (isPlaying()) {
+        if (!mySettings.invertVolumeButtons) {
+          volumeDownButton();
+        }
+        else {
+          previousButton();
+        }
+      }
+      else {
+        playShortCut(2);
+      }
+      ignoreDownButton = true;
+#endif
+    }
+    else if (downButton.wasReleased()) {
+      if (!ignoreDownButton) {
+        if (!mySettings.invertVolumeButtons) {
+          previousButton();
+        }
+        else {
+          volumeDownButton();
+        }
+      }
+      ignoreDownButton = false;
+    }
+#ifdef FIVEBUTTONS
+    if (buttonFour.wasReleased()) {
+      if (isPlaying()) {
+        if (!mySettings.invertVolumeButtons) {
+          volumeUpButton();
+        }
+        else {
+          nextButton();
+        }
+      }
+      else {
+        playShortCut(1);
+      }
+    }
+    if (buttonFive.wasReleased()) {
+      if (isPlaying()) {
+        if (!mySettings.invertVolumeButtons) {
+          volumeDownButton();
+        }
+        else {
+          previousButton();
+        }
+      }
+      else {
+        playShortCut(2);
+      }
+    }
+#endif
+    // Loop bis RFID Karte erkannt wurde
+  } while (!mfrc522.PICC_IsNewCardPresent());
+
+  // RFID Karte wurde aufgelegt
+  if (!mfrc522.PICC_ReadCardSerial()){
+    return;
+  }
+  if (readCard(&myCard) == true) {
+    // Bekannte Karte erkannt - abspielen des Albums
+    if (myCard.cookie == cardCookie && myCard.nfcFolderSettings.folder != 0 && myCard.nfcFolderSettings.mode != 0) {
+      playFolder();
+    }
+    // Neue Karte erkannt - Setup der Karte
+    else if (myCard.cookie != cardCookie) {
+      knownCard = false;
+      mp3.playMp3FolderTrack(300);
+      waitForTrackToFinish();
+      setupCard();
+    }
+  }
+  mfrc522.PICC_HaltA();
+  mfrc522.PCD_StopCrypto1();
+}
+// ################################ Ende der Hauptschleife ###############################
+
+// ################################ Funktionen ##############################################
 // Tasten abfragen
 void readButtons() {
   pauseButton.read();
@@ -974,21 +1331,21 @@ void previousButton() {
 
 // Einen Ordner abspielen
 void playFolder() {
-    disablestandbyTimer();
-    knownCard = true;
-    ansage = true; // Verhindert nextTrack()
-    Serial.print(F("== playFolder(")); 
-    Serial.print("Album ");Serial.print(myFolder->folder);Serial.println(")");
-    Serial.print("== Album-Ansage 000 spielen in Ordner ");Serial.println(myFolder->folder);
-    mp3.playFolderTrack(myFolder->folder,0);
-    delay(3000); // Warten - Der Track 000 muss innerhalb dieser Zeit starten
-    waitForTrackToFinish();  //Warten bis Ansage der Ordnernummer beendet
-    ansage = false; // Erlaubt nextTrack
-    Serial.println(F("== Anzahl der Dateien im Ordner werden ermitteln")); 
-    numTracksInFolder = mp3.getFolderTrackCount(myFolder->folder) - 1; // Die Ansage wird abgezogen
-    Serial.print(numTracksInFolder); Serial.print(F(" Dateien in Ordner ")); Serial.println(myFolder->folder);
-    _lastTrackFinished = 0;
-    firstTrack = 1;
+  disablestandbyTimer();
+  knownCard = true;
+  ansage = true; // Verhindert nextTrack()
+  Serial.print(F("== playFolder("));
+  Serial.print("Album "); Serial.print(myFolder->folder); Serial.println(")");
+  Serial.print("== Album-Ansage 000 spielen in Ordner "); Serial.println(myFolder->folder);
+  mp3.playFolderTrack(myFolder->folder, 0);
+  delay(3000); // Warten - Der Track 000 muss innerhalb dieser Zeit starten
+  waitForTrackToFinish();  //Warten bis Ansage der Ordnernummer beendet
+  ansage = false; // Erlaubt nextTrack
+  Serial.println(F("== Anzahl der Dateien im Ordner werden ermitteln"));
+  numTracksInFolder = mp3.getFolderTrackCount(myFolder->folder) - 1; // Die Ansage wird abgezogen
+  Serial.print(numTracksInFolder); Serial.print(F(" Dateien in Ordner ")); Serial.println(myFolder->folder);
+  _lastTrackFinished = 0;
+  firstTrack = 1;
 
   // Hörspielmodus: eine zufällige Datei aus dem Ordner
   if (myFolder->mode == 1) {
@@ -1009,7 +1366,7 @@ void playFolder() {
       F("Party Modus -> Ordner in zufälliger Reihenfolge wiedergeben"));
     shuffleQueue();
     currentTrack = 1;
-    Serial.print(F("Spiele Titel "));Serial.println(queue[currentTrack - 1]);
+    Serial.print(F("Spiele Titel ")); Serial.println(queue[currentTrack - 1]);
     mp3.playFolderTrack(myFolder->folder, queue[currentTrack - 1]);
   }
   // Einzel Modus: eine Datei aus dem Ordner abspielen
@@ -1078,362 +1435,6 @@ void playShortCut(uint8_t shortCut) {
     Serial.println(F("Shortcut not configured!"));
 }
 
-// ############################################  Programm - Hauptschleife #################################################
-void loop() {
-  do{
-      checkStandbyAtMillis();
-      mp3.loop();
-      // Modifier : WIP!
-      if (activeModifier != NULL) {
-        activeModifier->loop();
-      }
-      // ----------   Liedänderung erkennen und LED-Animation aktivieren   ---------- //   
-      currentDetectedTrack = currentTrack;
-      if (currentDetectedTrack != lastDetectedTrack) {
-        strip.clear();
-        if(currentTrack > lastDetectedTrack){ //nächstes Titel
-          lsrAnimationTrackMode = 1;
-          lsrColors = lsrColorUp;
-        }
-        if(currentTrack < lastDetectedTrack){ // vorheriger Titel
-          lsrAnimationTrackMode = 2;
-          lsrColors = lsrColorDown;
-        }
-        lsrAnimationMode = 1;
-        animationCountdown = strip.numPixels();
-        lsrLoopCountWait = 5; // Geschwindigkeit der Animation, desto größer desto langsamer
-        y = 0;
-      }
-      // ----------    Lautstärkenanpassung erkennen und Animation aktivieren    ---------- //  
-      currentDetectedVolume = volume;
-      if (currentDetectedVolume != lastDetectedVolume) {
-        lsrAnimationMode = 2;
-        animationCountdown = strip.numPixels();
-        lsrLoopCountWait = 6;
-        y = 0;
-      }
-      // ----------   Loop Animation: Default Mode   ---------- //  
-      if (lsrAnimationMode == 0 && loopCountdown == 0 && isPlaying() == false && knownCard == false) {
-        lsrLoopCountWait = 1; // Geschwindigkeit der Animation, desto größer desto langsamer
-        // Farbe & Animation definieren: Alle LEDs leuchten alle abwechselnd  im hue Spektrum
-        y++;
-        if (y >= (strip.numPixels()*8) ) {
-          y = 0;
-        }
-        strip.fill(strip.ColorHSV((y * 65536 / strip.numPixels() / 8) , 255, 30), 0, 0);
-        strip.show();
-        loopCountdown = lsrLoopCountWait;
-      }
-      // ----------   Loop Animation: Musik spielt   ---------- // 
-      if (lsrAnimationMode == 0 && loopCountdown == 0 && isPlaying() == true && knownCard == true) {
-        lsrLoopCountWait = 5; // Geschwindigkeit der Animation, desto größer desto langsamer
-        // Fabre definieren: hue Spektrum (Rainbow)
-        do{
-          for (i = 0; i < strip.numPixels(); i++) {
-            lsrColors = strip.ColorHSV(i * 65536 / strip.numPixels(), 255, 30);
-            strip.setPixelColor(i, lsrColors);
-            lsrColorR[i] = (lsrColors >> 16 & 0xFF);
-            lsrColorG[i] = (lsrColors >> 8 & 0xFF);
-            lsrColorB[i] = (lsrColors & 0xFF);
-          }
-          x++;
-        } while (x < strip.numPixels());
-        // Animation definieren: Rotation im Uhrzeigersinn
-        y++;
-        x = 0;
-        if (y >= strip.numPixels()) {
-          y = 0;
-        }
-        do {
-          for (i = 0; i < strip.numPixels(); i++) {
-            strip.setPixelColor((i + y) % strip.numPixels(), lsrColorR[i], lsrColorG[i], lsrColorB[i]);
-          }
-          x++;
-        } while (x < strip.numPixels());
-        strip.show();
-        loopCountdown = lsrLoopCountWait;
-      }
-      // ----------   Loop Animation: Musik pausiert   ---------- //  
-      if (lsrAnimationMode == 0 && loopCountdown == 0 && isPlaying() == false && knownCard == true) {
-        lsrLoopCountWait = 7; // Geschwindigkeit der Animation, desto größer desto langsamer
-        strip.clear();   // Danach wandert nur nur ein Punkt
-        // Farbe definieren: hue Spektrum (Rainbow)
-        x=0;
-        do {
-          for (i = 0; i < strip.numPixels(); i++) {
-            lsrColors = strip.ColorHSV(i * 65536 / strip.numPixels(), 255, 30);
-            lsrColorR[i] = (lsrColors >> 16 & 0xFF);
-            lsrColorG[i] = (lsrColors >> 8 & 0xFF);
-            lsrColorB[i] = (lsrColors & 0xFF);
-          }
-          x++;
-        } while (x < strip.numPixels());
-        // Farbe definieren: Füllend ansteigend
-        y++;
-        if (y >= strip.numPixels()) {
-          y = 0;
-          z++;
-          strip.clear();
-        }
-        if (z >= strip.numPixels()) {   
-          z = 0;
-        }
-        x=0;
-        do {
-          for (i = 0; i < y +1 ; i++) {
-            strip.setPixelColor( y , lsrColorR[y], lsrColorG[y], lsrColorB[y]);
-          }
-          x++;
-        } while (x < y + 1);
-        strip.show();
-        loopCountdown = lsrLoopCountWait;
-      }
-      // ----------   Einmalige Animation: Liedänderung    ---------- //
-      if (lsrAnimationMode == 1 && loopCountdown == 0) {
-        // Fabre definieren: oben definiert
-        x=0;
-        do  {
-          for (i = 0; i < strip.numPixels(); i++) {
-            lsrColorR[i] = (lsrColors >> 16 & 0xFF);
-            lsrColorG[i] = (lsrColors >> 8 & 0xFF);
-            lsrColorB[i] = (lsrColors & 0xFF);
-          }
-          x++;
-        } while (x < strip.numPixels());
-        // Animation definieren: oben definiert
-        if (y >= strip.numPixels()){ 
-          strip.clear();
-          y = 0; 
-        }
-        if(lsrAnimationTrackMode == 1){
-          z = y ;
-        }
-        if(lsrAnimationTrackMode == 2){
-          z = strip.numPixels() - y ;
-        }
-        x=0;  
-        do {
-          for (i = 0; i < y +1 ; i++) {
-            strip.setPixelColor( z , lsrColorR[y], lsrColorG[y], lsrColorB[y]);
-          }
-          x++;
-        } while (x < y + 1);
-        y++;
-        strip.show();
-        if (animationCountdown != 0) { 
-          animationCountdown--; 
-        }
-        if (animationCountdown == 0) {
-          lsrAnimationMode = 0;
-        }
-        loopCountdown = lsrLoopCountWait ;
-      }
-      // ----------   Einmalige Animation: Prozentuale Lautstärkenanpassung   ---------- // 
-      if (lsrAnimationMode == 2 && loopCountdown == 0) {
-        if (animationCountdown != 0) {
-          animationCountdown--;
-        }
-        if (currentDetectedVolume != lastDetectedVolume) {
-          lsrLoopCountWait = 5;
-        }
-        volumeScope = (mySettings.maxVolume - mySettings.minVolume);
-        volumeScopeAmount = (volume - mySettings.minVolume) * (LED_COUNT - 1) / volumeScope; // Lautstärkenanzeige angepasst an die Anzahl der LEDs
-        // Fabre definieren: von grün zu rot
-        x = 0;
-        do {
-          for (i = 0; i < strip.numPixels(); i++) {
-            lsrHueCalc = 21000 / (strip.numPixels() - 1) / (strip.numPixels() - 1);
-            lsrColors = strip.ColorHSV(((strip.numPixels() - 1) - i) * (strip.numPixels() - 1) * lsrHueCalc, 255, 30);
-            strip.setPixelColor(i, lsrColors);
-            lsrColorR[i] = (lsrColors >> 16 & 0xFF);
-            lsrColorG[i] = (lsrColors >> 8 & 0xFF);
-            lsrColorB[i] = (lsrColors & 0xFF);
-          }
-          x++;
-        } while (x < strip.numPixels());
-        // Animation definieren: Prozentuale Lautstärkenanpassung
-        strip.clear();
-        x = 0;
-        do {
-          for (i = 0; i < volumeScopeAmount + 1; i++) {
-            strip.setPixelColor(i, lsrColorR[i], lsrColorG[i], lsrColorB[i]);
-          }
-          x++;
-        } while (x < (volumeScopeAmount + 1));
-        strip.show();
-        if (animationCountdown == 0) {
-          //delay(20);
-          lsrAnimationMode = 0;
-        }
-        loopCountdown = lsrLoopCountWait;
-      }
-      // ----------   Countdown Zähler über den loop als ersatz zur delay Funktion   ----------
-      if (loopCountdown != 0 ){ 
-        loopCountdown--;
-      }
-      // ----------   Dadurch wird die Änderung der Lautstärke bzw. Track nur ein mal registiert   ----------
-      lastDetectedVolume = currentDetectedVolume;
-      lastDetectedTrack = currentDetectedTrack;
-      // Buttons werden nun über JS_Button gehandelt, dadurch kann jede Taste doppelt belegt werden
-      readButtons();
-      // admin menu
-      if ((pauseButton.pressedFor(LONG_PRESS) || upButton.pressedFor(LONG_PRESS) || downButton.pressedFor(LONG_PRESS)) && pauseButton.isPressed() && upButton.isPressed() && downButton.isPressed()) {
-        mp3.pause();
-        do {
-          readButtons();
-        } while (pauseButton.isPressed() || upButton.isPressed() || downButton.isPressed());
-        readButtons();
-        adminMenu();
-        break;
-      }
-      if (pauseButton.wasReleased()) {
-        if (activeModifier != NULL) {
-          if (activeModifier->handlePause() == true){
-            return;
-          }
-          if (ignorePauseButton == false){
-            if (isPlaying()) {
-              mp3.pause();
-              setstandbyTimer();
-            }
-            else if (knownCard) {
-              mp3.start();
-              disablestandbyTimer();
-            }
-          }
-          ignorePauseButton = false;
-        } 
-        else if (pauseButton.pressedFor(LONG_PRESS) && ignorePauseButton == false) {
-          if (activeModifier != NULL) {
-            if (activeModifier->handlePause() == true) {
-              return;
-            }
-          }
-          if (isPlaying()) {
-            uint8_t advertTrack;
-            if (myFolder->mode == 3 || myFolder->mode == 9) {
-              advertTrack = (queue[currentTrack - 1]);
-            }
-            else {
-              advertTrack = currentTrack;
-            }
-            // Spezialmodus Von-Bis für Album und Party gibt die Dateinummer relativ zur Startposition wieder
-            if (myFolder->mode == 8 || myFolder->mode == 9) {
-              advertTrack = advertTrack - myFolder->special + 1;
-            }
-            mp3.playAdvertisement(advertTrack);
-          }
-          else {
-            playShortCut(0);
-          }
-          ignorePauseButton = true;
-        }
-        if (upButton.pressedFor(LONG_PRESS)) {
-#ifndef FIVEBUTTONS
-          if (isPlaying()) {
-            if (!mySettings.invertVolumeButtons) {
-              volumeUpButton();
-            }
-            else {
-              nextButton();
-            }
-          }
-          else {
-            playShortCut(1);
-          }
-          ignoreUpButton = true;
-#endif
-        } else if (upButton.wasReleased()) {
-        if (!ignoreUpButton){
-          if (!mySettings.invertVolumeButtons) {
-            nextButton();
-          }
-        }
-        else {
-          volumeUpButton();
-        }
-        ignoreUpButton = false;
-      }
-      if (downButton.pressedFor(LONG_PRESS)) {
-#ifndef FIVEBUTTONS
-        if (isPlaying()) {
-          if (!mySettings.invertVolumeButtons) {
-            volumeDownButton();
-          }
-          else {
-            previousButton();
-          }
-        }
-        else {
-          playShortCut(2);
-        }
-        ignoreDownButton = true;
-#endif
-      } 
-      else if (downButton.wasReleased()) {
-        if (!ignoreDownButton) {
-          if (!mySettings.invertVolumeButtons) {
-            previousButton();
-          }
-          else {
-            volumeDownButton();
-          }
-        }
-        ignoreDownButton = false;
-      }
-#ifdef FIVEBUTTONS
-      if (buttonFour.wasReleased()) {
-        if (isPlaying()) {
-          if (!mySettings.invertVolumeButtons) {
-            volumeUpButton();
-          }
-          else {
-            nextButton();
-          }
-        }
-        else {
-          playShortCut(1);
-        }
-      }
-      if (buttonFive.wasReleased()) {
-        if (isPlaying()) {
-          if (!mySettings.invertVolumeButtons) {
-            volumeDownButton();
-          }
-          else {
-            previousButton();
-          }
-        }
-        else {
-          playShortCut(2);
-        }
-      }
-#endif
-      // Ende der Buttons
-    } while (!mfrc522.PICC_IsNewCardPresent());
-
-    // RFID Karte wurde aufgelegt
-    if (!mfrc522.PICC_ReadCardSerial()){
-      return;
-    }
-    if (readCard(&myCard) == true) {
-      if (myCard.cookie == cardCookie && myCard.nfcFolderSettings.folder != 0 && myCard.nfcFolderSettings.mode != 0) {
-        playFolder();
-      }
-      // Neue Karte konfigurieren
-      else if (myCard.cookie != cardCookie) {
-        knownCard = false;
-        mp3.playMp3FolderTrack(300);
-        waitForTrackToFinish();
-        setupCard();
-      }
-    }
-    mfrc522.PICC_HaltA();
-    mfrc522.PCD_StopCrypto1();
-  }
-// ################################ Ende der Hauptschleife ###############################
-
-// ################################ Funktionen ##############################################
 void adminMenu(bool fromCard = false) {
   disablestandbyTimer();
   mp3.pause();
@@ -1452,7 +1453,7 @@ void adminMenu(bool fromCard = false) {
         if (checkTwo(pin, mySettings.adminMenuPin) == false) {
           return;
         }
-      } 
+      }
       else {
         return;
       }
@@ -1722,7 +1723,7 @@ uint8_t voiceMenu(int numberOfOptions, int startMessage, int messageOffset,
           waitForTrackToFinish();
           if (previewFromFolder == 0) {
             mp3.playFolderTrack(returnValue, 1);
-          } 
+          }
           else {
             mp3.playFolderTrack(previewFromFolder, returnValue);
           }
@@ -1746,7 +1747,7 @@ uint8_t voiceMenu(int numberOfOptions, int startMessage, int messageOffset,
           mp3.playFolderTrack(previewFromFolder, returnValue);
         }*/
       ignoreDownButton = true;
-    } 
+    }
     else if (downButton.wasReleased()) {
       if (!ignoreDownButton) {
         returnValue = max(returnValue - 1, 1);
@@ -1763,7 +1764,7 @@ uint8_t voiceMenu(int numberOfOptions, int startMessage, int messageOffset,
           }
           delay(1000);
         }
-      } 
+      }
       else {
         ignoreDownButton = false;
       }
@@ -1785,7 +1786,7 @@ void resetCard() {
     }
   } while (!mfrc522.PICC_IsNewCardPresent());
 
-  if (!mfrc522.PICC_ReadCardSerial()){
+  if (!mfrc522.PICC_ReadCardSerial()) {
     return;
   }
   Serial.print(F("Karte wird neu konfiguriert!"));
@@ -1795,7 +1796,7 @@ void resetCard() {
 bool setupFolder(folderSettings * theFolder) {
   // Ordner abfragen
   theFolder->folder = voiceMenu(99, 301, 0, true, 0, 0, true);
-  if (theFolder->folder == 0){ 
+  if (theFolder->folder == 0) {
     return false;
   }
   // Wiedergabemodus abfragen
@@ -1806,7 +1807,7 @@ bool setupFolder(folderSettings * theFolder) {
   //  // Hörbuchmodus -> Fortschritt im EEPROM auf 1 setzen
   //  EEPROM.update(theFolder->folder, 1);
   // Einzelmodus -> Datei abfragen
-  if (theFolder->mode == 4){
+  if (theFolder->mode == 4) {
     theFolder->special = voiceMenu(mp3.getFolderTrackCount(theFolder->folder), 320, 0, true, theFolder->folder);
   }
   // Admin Funktionen
@@ -1829,7 +1830,7 @@ void setupCard() {
   mp3.pause();
   Serial.println(F("=== setupCard()"));
   nfcTagObject newCard;
-  if (setupFolder(&newCard.nfcFolderSettings) == true){
+  if (setupFolder(&newCard.nfcFolderSettings) == true) {
     // Karte ist konfiguriert -> speichern
     mp3.pause();
     do {
@@ -1850,11 +1851,11 @@ bool readCard(nfcTagObject * nfcTag) {
   byte buffer[18];
   byte size = sizeof(buffer);
   // Authenticate using key A
-  if ((piccType == MFRC522::PICC_TYPE_MIFARE_MINI ) || (piccType == MFRC522::PICC_TYPE_MIFARE_1K ) ||  (piccType == MFRC522::PICC_TYPE_MIFARE_4K )){
+  if ((piccType == MFRC522::PICC_TYPE_MIFARE_MINI ) || (piccType == MFRC522::PICC_TYPE_MIFARE_1K ) ||  (piccType == MFRC522::PICC_TYPE_MIFARE_4K )) {
     Serial.println(F("Authenticating Classic using key A..."));
     status = mfrc522.PCD_Authenticate(MFRC522::PICC_CMD_MF_AUTH_KEY_A, trailerBlock, &key, &(mfrc522.uid));
   }
-  else if (piccType == MFRC522::PICC_TYPE_MIFARE_UL ){
+  else if (piccType == MFRC522::PICC_TYPE_MIFARE_UL ) {
     byte pACK[] = {0, 0}; //16 bit PassWord ACK returned by the tempCard Authenticate using key A
     Serial.println(F("Authenticating MIFARE UL..."));
     status = mfrc522.PCD_NTAG216_AUTH(key.keyByte, pACK);
@@ -1869,7 +1870,7 @@ bool readCard(nfcTagObject * nfcTag) {
   // mfrc522.PICC_DumpMifareClassicSectorToSerial(&(mfrc522.uid), &key, sector);
   // Serial.println();
   // Read data from the block
-  if ((piccType == MFRC522::PICC_TYPE_MIFARE_MINI ) || (piccType == MFRC522::PICC_TYPE_MIFARE_1K ) || (piccType == MFRC522::PICC_TYPE_MIFARE_4K ) ){
+  if ((piccType == MFRC522::PICC_TYPE_MIFARE_MINI ) || (piccType == MFRC522::PICC_TYPE_MIFARE_1K ) || (piccType == MFRC522::PICC_TYPE_MIFARE_4K ) ) {
     Serial.print(F("Reading data from block "));
     Serial.print(blockAddr);
     Serial.println(F(" ..."));
@@ -1994,14 +1995,14 @@ bool readCard(nfcTagObject * nfcTag) {
 void writeCard(nfcTagObject nfcTag) {
   MFRC522::PICC_Type mifareType;
   byte buffer[16] = {
-                    0x13, 0x37, 0xb3, 0x47,                     // 0x1337 0xb347 magic cookie to  identify our nfc tags
-                    0x02,                                       // version 1
-                    nfcTag.nfcFolderSettings.folder,            // the folder picked by the user
-                    nfcTag.nfcFolderSettings.mode,              // the playback mode picked by the user
-                    nfcTag.nfcFolderSettings.special,           // track or function for admin cards
-                    nfcTag.nfcFolderSettings.special2,
-                    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
-                    };
+    0x13, 0x37, 0xb3, 0x47,                     // 0x1337 0xb347 magic cookie to  identify our nfc tags
+    0x02,                                       // version 1
+    nfcTag.nfcFolderSettings.folder,            // the folder picked by the user
+    nfcTag.nfcFolderSettings.mode,              // the playback mode picked by the user
+    nfcTag.nfcFolderSettings.special,           // track or function for admin cards
+    nfcTag.nfcFolderSettings.special2,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+  };
   byte size = sizeof(buffer);
   mifareType = mfrc522.PICC_GetType(mfrc522.uid.sak);
   // Authenticate using key B
@@ -2064,7 +2065,7 @@ void dump_byte_array(byte * buffer, byte bufferSize) {
     Serial.print(buffer[i], HEX);
   }
 }
-//Check Bytes 
+//Check Bytes
 bool checkTwo ( uint8_t a[], uint8_t b[] ) {
   for ( uint8_t k = 0; k < 4; k++ ) {   // Loop 4 times
     if ( a[k] != b[k] ) {     // IF a != b then false, because: one fails, all fail
