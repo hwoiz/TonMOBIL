@@ -15,7 +15,7 @@
   Information and contribution at https://tonuino.de. 
 */
 
-char version[] = "1.2";
+char version[] = "1.2";  // Archiviert - nicht mehr benutzen
 
 #include <DFMiniMp3.h>
 #include <EEPROM.h>
