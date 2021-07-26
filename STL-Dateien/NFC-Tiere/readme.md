@@ -1,5 +1,5 @@
 ## NFC-Tiere
-Druckvorlagen für Tierfiguren. 
+Druckvorlagen für Tierfiguren. Die Figuren sind ca 7 cm hoch.
 
 In die Bodenplatte kann ein NFC-Aufkleber von 25 mm Durchmesser eingefügt werden. Die Bodenplatte wird mit Sekundenkleber mit der Figur dauerhaft verklebt.
 
