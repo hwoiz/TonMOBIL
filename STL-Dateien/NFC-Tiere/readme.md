@@ -5,9 +5,9 @@ In die Bodenplatte kann ein NFC-Aufkleber von 25 mm Durchmesser eingefügt werde
 
 Die Figuren können mit Acrylfarben aus dem Modellbau nach eigener Vorstellung bemalt werden.
 
+![Die Maus](https://user-images.githubusercontent.com/52963785/127061494-56940147-6a29-4eac-96b5-44f115156010.png)
 ![Frosch](https://user-images.githubusercontent.com/52963785/127029420-2b98e7e7-8ae4-434a-9e14-ab9cc3d1e66c.png)
 ![Hund](https://user-images.githubusercontent.com/52963785/127029392-134a31fa-ac53-4eb2-b15d-3729a1691fc5.png)
-![Die Maus](https://user-images.githubusercontent.com/52963785/127061494-56940147-6a29-4eac-96b5-44f115156010.png)
 
 ![Bär](https://user-images.githubusercontent.com/52963785/127029439-aa09d542-dfc8-43ac-937e-e8edff34b793.png)
 ![Katze](https://user-images.githubusercontent.com/52963785/127029384-4a78637e-f2a2-4ad9-9621-58dddc8154f3.png)
