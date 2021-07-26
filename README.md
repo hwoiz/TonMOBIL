@@ -4,6 +4,7 @@
 ## Danksagung
 Als Vorlage für mein Projekt diente das Projekt TonUINO von Thorsten Voß.
 [https://www.voss.earth/tonuino](https://www.voss.earth/tonuino)
+
 Viele Forenbeiträge aus [https://discourse.voss.earth] (https://discourse.voss.earth/) haben mich animiert eine eigene Variante zu erstellen.
 ## Einleitung
 Die Zeiten von Kasseten und CD sind inzwischen vorbei. Heute sind MP3-Dateien das Medium der Wahl.
