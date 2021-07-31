@@ -14,4 +14,4 @@ Die Figuren können mit Acrylfarben aus dem Modellbau nach eigener Vorstellung b
 ![Eichörnchen](https://user-images.githubusercontent.com/52963785/127029427-8276bc04-e6cc-4fbe-bd9e-26425e5aacef.png)
 ![Elefant](https://user-images.githubusercontent.com/52963785/127736935-cd3607fc-9403-4f0d-9b29-40ac4097e28c.png)
 
-
+Die Vorlagen der Tierfiguren stammen aus öffentlich verfügbaren Internetquellen und wurden von mir in der Größe verändert und mit einer Bodenplatte für einen NFC-Aufkleber (25mm Durchmesser) versehen.
