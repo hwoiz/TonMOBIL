@@ -17,12 +17,7 @@
 
 char version[] = "1.5";
 /* 
-In dieser Version wurde der Quelltext in die Abschnitte
-   - Declaration
-   - Setup
-   - Loop
-   - Funktion
-aufgeteilt.
+In dieser Version wurde die Aufteilung des Quelltext in die Abschnitte wieder rückgängig gemacht.
 */
 
 #include <DFMiniMp3.h>
