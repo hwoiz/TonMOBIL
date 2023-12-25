@@ -15,6 +15,8 @@
     Advance by Harald Woizischke 
 */
 
+char version[] = "1.5";
+
 #include <DFMiniMp3.h>
 #include <EEPROM.h>
 #include <JC_Button.h>
